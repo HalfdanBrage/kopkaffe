@@ -1,6 +1,7 @@
 <script lang="ts">
-  let dimensions = [20, 20]
+  let dimensions = [100, 100]
   let playing = false
+  let noiseRatio = 0.5
 
   async function sleep(ms: number): Promise<void> {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,6 +13,17 @@
       out[i]=[]
       for (let j = 0; j < y; j++) {
         out[i][j] = 0
+      }
+    }
+    return out
+  }
+
+  function generateRandomGrid(x: number, y: number) {
+    let out:number[][] = []
+    for (let i = 0; i < x; i++) {
+      out[i]=[]
+      for (let j = 0; j < y; j++) {
+        out[i][j] = Math.random() < noiseRatio ? 1 : 0
       }
     }
     return out
@@ -78,8 +90,24 @@
 	<meta name="description" content="About this app" />
 </svelte:head>
 
-<div class="text-column">
+<div class="page-content">
 	<h1>Conways game of life!</h1>
+
+  <div class="button-row">
+    <button on:click={() => (grid = generateRandomGrid(dimensions[0], dimensions[1]))}>
+      noise 
+      <input type="number" bind:value={noiseRatio} min="0" max="1" step="0.1">
+    </button>
+    <button on:click={() => (grid = generateEmptyGrid(dimensions[0], dimensions[1]))}>
+      clear
+    </button>
+    <button on:click={updateGrid}>
+      step
+    </button>
+    <button on:click={toggle}>
+      {playing ? "pause" : "play"}
+    </button>
+  </div>
 
   <div class="grid">
     {#each grid as column, i}
@@ -93,18 +121,6 @@
       </div>
     {/each}
   </div>
-
-  <div class="button-row">
-    <button on:click={() => (grid = generateEmptyGrid(dimensions[0], dimensions[1]))}>
-      clear
-    </button>
-    <button on:click={updateGrid}>
-      step
-    </button>
-    <button on:click={toggle}>
-      {playing ? "pause" : "play"}
-    </button>
-  </div>
 </div>
 
 <style>
@@ -113,10 +129,18 @@
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    width: 80%;
   }
   .column {
     display: flex;
     justify-content: space-evenly;
+  }
+
+  .page-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
   }
 
   .cell-0, .cell-1, .cell-0:focus, .cell-1:focus{
